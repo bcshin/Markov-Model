@@ -11,9 +11,9 @@ import java.util.Set;
  * the model. A kgram is a sequence of k consecutive characters in the source
  * text.
  *
- * @author     Your Name (you@auburn.edu)
+ * @author     Brian Shin - bcs0058@auburn.edu
  * @author     Dean Hendrix (dh@auburn.edu)
- * @version    2018-04-17
+ * @version    2022-6-26
  *
  */
 public class MarkovModel {
@@ -59,6 +59,29 @@ public class MarkovModel {
     * Builds an order K Markov model of the string sourceText.
     */
    private void buildModel(int K, String sourceText) {
+      String firstKgram = sourceText.substring(0, K);
+      int start = 0;
+      for (int i = start + K; i <= sourceText.length(); i++) {
+         String key = sourceText.substring(i, i + K);
+         if (!model.containsKey(key)) {
+            if (i == sourceText.length()) {
+               model.put(key, Character.toString('\u0000'));
+            }
+            else {
+               model.put(key, Character.toString(sourceText.charAt(i)));
+            }
+         }
+         else {
+            String map = model.get(key);
+            if (i == sourceText.length()) {
+               map += Character.toString('\u0000');
+            }
+            else {
+               map += sourceText.charAt(i);
+            }
+            model.replace(key, map);
+         }
+      }
 
    }
 

@@ -43,7 +43,13 @@ public class TextGenerator {
 
       // instantiate a MarkovModel with the supplied parameters and
       // generate sample output text ...
-
+      MarkovModel model = new MarkovModel(K, text);
+        System.out.println("k = " + K + ", source text: " + text);
+        System.out.println("The first kgram: " + model.getFirstKgram());
+        System.out.println("A random kgram: " + model.getRandomKgram());
+        System.out.println("All kgrams: " + model.getAllKgrams());
+        System.out.println("The Markov model: ");
+        System.out.println(model);
 
    }
 }

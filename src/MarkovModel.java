@@ -1,5 +1,7 @@
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
@@ -22,6 +24,9 @@ public class MarkovModel {
    private HashMap<String, String> model;
 
    // add other fields as you need them ...
+   private String firstKgram;
+   private List<String> keyList;
+   private final Random rng = new Random();
 
 
    /**
@@ -31,10 +36,10 @@ public class MarkovModel {
     * DO NOT CHANGE THIS CONSTRUCTOR.
     *
     */
-   public MarkovModel(int K, File sourceText) {
+   public MarkovModel(final int K, final File sourceText) {
       model = new HashMap<>();
       try {
-         String text = new Scanner(sourceText).useDelimiter("\\Z").next();
+         final String text = new Scanner(sourceText).useDelimiter("\\Z").next();
          buildModel(K, text);
       }
       catch (IOException e) {
@@ -59,28 +64,37 @@ public class MarkovModel {
     * Builds an order K Markov model of the string sourceText.
     */
    private void buildModel(int K, String sourceText) {
-      String firstKgram = sourceText.substring(0, K);
-      int start = 0;
-      for (int i = start + K; i <= sourceText.length(); i++) {
-         String key = sourceText.substring(i, i + K);
-         if (!model.containsKey(key)) {
-            if (i == sourceText.length()) {
-               model.put(key, Character.toString('\u0000'));
+      // get the first kgram 
+      firstKgram = sourceText.substring(0, K);
+
+      // loop through the source text and extract all kgrams
+      int currentIndex = 0;
+      while (currentIndex + K <= sourceText.length()) {
+         // getting the next kgram: will be used as key in our hashmap
+         final String kgram = sourceText.substring(currentIndex, currentIndex + K);
+
+         // if the model already contains that kgram then 
+         if (model.containsKey(kgram)) {
+            String kgramKeyValue = model.get(kgram);
+
+            // base case: the source text length is <= k or reached the end of file
+            if (currentIndex + K == sourceText.length()) {
+               kgramKeyValue += Character.toString('\u0000');
+            }
+            else { // attach the kgram value to the key in the hashmap
+               kgramKeyValue += Character.toString(sourceText.charAt(currentIndex + K));
+            }
+            model.replace(kgram, kgramKeyValue);
+         }
+         else { // if not then make a new key in the map, then append that keyvalue to the key
+            if (currentIndex + K == sourceText.length()) {
+               model.put(kgram, Character.toString('\u0000'));
             }
             else {
-               model.put(key, Character.toString(sourceText.charAt(i)));
+               model.put(kgram, Character.toString(sourceText.charAt(currentIndex + K)));
             }
          }
-         else {
-            String map = model.get(key);
-            if (i == sourceText.length()) {
-               map += Character.toString('\u0000');
-            }
-            else {
-               map += sourceText.charAt(i);
-            }
-            model.replace(key, map);
-         }
+         currentIndex++;
       }
 
    }
@@ -88,13 +102,16 @@ public class MarkovModel {
 
    /** Returns the first kgram found in the source text. */
    public String getFirstKgram() {
-      return null;
+      return firstKgram;
    }
 
 
    /** Returns a kgram chosen at random from the source text. */
    public String getRandomKgram() {
-      return null;
+      if (keyList == null || keyList.size() != model.size()) {
+         keyList = new ArrayList<String>(getAllKgrams());
+      }
+      return keyList.get(rng.nextInt(keyList.size()));
    }
 
 
@@ -115,8 +132,14 @@ public class MarkovModel {
     * distribution of all characters that follow the given kgram in the source
     * text.
     */
-   public char getNextChar(String kgram) {
-      return '\u0000';
+   public char getNextChar(final String kgram) {
+      if (model.containsKey(kgram)) {
+         final String value = model.get(kgram);
+         return value.charAt(rng.nextInt(value.length()));
+      }
+      else {
+         return '\u0000';
+      }
    }
 
 

@@ -1,5 +1,5 @@
 import java.io.File;
-import java.io.IOException;
+// import java.io.IOException;
 
 /**
  * TextGenerator.java. Creates an order K Markov model of the supplied source
@@ -43,13 +43,17 @@ public class TextGenerator {
 
       // instantiate a MarkovModel with the supplied parameters and
       // generate sample output text ...
-      MarkovModel model = new MarkovModel(K, text);
-        System.out.println("k = " + K + ", source text: " + text);
-        System.out.println("The first kgram: " + model.getFirstKgram());
-        System.out.println("A random kgram: " + model.getRandomKgram());
-        System.out.println("All kgrams: " + model.getAllKgrams());
-        System.out.println("The Markov model: ");
-        System.out.println(model);
+      String output = "";
+      MarkovModel mv = new MarkovModel(K, text);
+      String rkgram = mv.getRandomKgram();
+      int i = 0;
+      output += rkgram;
+      while (i < M - K) {
+         output += mv.getNextChar(rkgram);
+         i++;
+         rkgram = output.substring(i, i + K);
+      }
+      System.out.println(output);
 
    }
 }
